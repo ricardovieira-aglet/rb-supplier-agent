@@ -100,6 +100,25 @@
     </div>
   </div>
 
+  <div style="margin-bottom:32px">
+    <div class="sec">03 &mdash; Mockups (placement preview)</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#666;margin-bottom:12px;">Screenshot do tech pack builder com as setas de placement</div>
+    <div class="art-row">
+      <div class="art" id="mfZone">
+        <input type="file" id="mfArt" accept="image/*" onchange="handleMockup(this,'front')">
+        <div class="ph"><div class="tag" style="background:#555;color:#f5f4f0;">Mockup Frente</div><div class="drop-sub">Placement preview &mdash; frente</div></div>
+        <img id="mfPrev" src="" alt="">
+        <div class="drop-fn" id="mfName"></div>
+      </div>
+      <div class="art" id="mbZone">
+        <input type="file" id="mbArt" accept="image/*" onchange="handleMockup(this,'back')">
+        <div class="ph"><div class="tag" style="background:#555;color:#f5f4f0;">Mockup Costa</div><div class="drop-sub">Placement preview &mdash; costa (opcional)</div></div>
+        <img id="mbPrev" src="" alt="">
+        <div class="drop-fn" id="mbName"></div>
+      </div>
+    </div>
+  </div>
+
   <button class="btn" id="runBtn" onclick="runAgent()" disabled>&#9889; Generate Supplier Sheet</button>
 
   <div class="status" id="statusBox">
@@ -128,6 +147,7 @@ window.addEventListener('load', function(){
 
 var LOGO_B64 = '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';
 var pdfB64=null,fB64=null,bB64=null,fType=null,bType=null,exData=null;
+var mfB64=null,mbB64=null,mfType=null,mbType=null;
 
 function handlePDF(inp){
   var f=inp.files[0]; if(!f)return;
@@ -152,6 +172,19 @@ function handleArt(inp,side){
   r.readAsDataURL(f);
 }
 function checkReady(){document.getElementById('runBtn').disabled=!(pdfB64&&fB64);}
+function handleMockup(inp,side){
+  var f=inp.files[0]; if(!f)return;
+  var id=side==="front"?"mf":"mb";
+  document.getElementById(id+"Name").textContent=f.name;
+  document.getElementById(id+"Zone").classList.add("ok");
+  var r=new FileReader();
+  r.onload=function(e){
+    var b=e.target.result.split(",")[1],m=f.type||"image/png";
+    if(side==="front"){mfB64=b;mfType=m;} else{mbB64=b;mbType=m;}
+    document.getElementById(id+"Prev").src=e.target.result;
+  };
+  r.readAsDataURL(f);
+}
 
 function addLog(txt,state){
   var d=document.createElement('div');d.className='log';
@@ -243,180 +276,20 @@ function showExt(d){
   });
 }
 
-// ── Garment Mockup Builder ────────────────────────────────────────────────────
-// Returns base64 PNG (no prefix) of the garment SVG rendered via Canvas
-function buildMockupPng(garmentType, placement, side) {
-  return new Promise(function(resolve) {
-    var isBack = side === 'back';
-    var g = (garmentType||'').toLowerCase();
-    var isTee = g.indexOf('t-shirt')!==-1||g.indexOf('tshirt')!==-1||g==='tee'||g.indexOf('t shirt')!==-1;
-    var svg = isTee ? getTeesvg(placement, isBack) : getHoodiesvg(placement, isBack);
-    var blob = new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
-    var url  = URL.createObjectURL(blob);
-    var img  = new Image();
+
+// Retorna dimensões da imagem em píxeis, fitada dentro de 300x310 preservando aspect ratio
+function getImageDims(b64, mtype) {
+  return new Promise(function(resolve){
+    var img = new Image();
     img.onload = function(){
-      var canvas = document.createElement('canvas');
-      canvas.width = 600; canvas.height = 700;
-      var ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,600,700);
-      ctx.drawImage(img,0,0,600,700);
-      URL.revokeObjectURL(url);
-      // return base64 without data: prefix
-      var dataUrl = canvas.toDataURL('image/png');
-      resolve(dataUrl.split(',')[1]);
+      var maxW = 300, maxH = 310;
+      var ratio = Math.min(maxW/img.naturalWidth, maxH/img.naturalHeight);
+      resolve({w: Math.round(img.naturalWidth*ratio), h: Math.round(img.naturalHeight*ratio)});
     };
-    img.onerror = function(){ URL.revokeObjectURL(url); resolve(null); };
-    img.src = url;
+    img.onerror = function(){ resolve({w:280, h:300}); };
+    img.src = 'data:'+mtype+';base64,'+b64;
   });
 }
-
-// Placement → {x,y,w,h} in SVG coordinate space (600×700 viewBox)
-function placementBox(placement, isBack, isTee) {
-  var p = (placement||'').toLowerCase();
-  // hoodie zones (approx)
-  if(!isTee){
-    if(!isBack){
-      if(p.indexOf('left chest')!==-1||p.indexOf('front left')!==-1) return {x:155,y:195,w:115,h:48};
-      if(p.indexOf('right chest')!==-1||p.indexOf('front right')!==-1) return {x:330,y:195,w:115,h:48};
-      if(p.indexOf('center chest')!==-1||p.indexOf('front center')!==-1||p.indexOf('chest center')!==-1) return {x:200,y:205,w:200,h:55};
-      if(p.indexOf('full front')!==-1) return {x:170,y:195,w:260,h:170};
-      return {x:155,y:195,w:115,h:48}; // default front left chest
-    } else {
-      if(p.indexOf('back center')!==-1||p.indexOf('center back')!==-1||p==='back'||p.indexOf('full back')!==-1) return {x:170,y:195,w:260,h:170};
-      if(p.indexOf('back left')!==-1) return {x:155,y:195,w:115,h:48};
-      if(p.indexOf('back right')!==-1) return {x:330,y:195,w:115,h:48};
-      if(p.indexOf('nape')!==-1||p.indexOf('collar')!==-1) return {x:210,y:145,w:180,h:42};
-      return {x:170,y:195,w:260,h:170};
-    }
-  } else {
-    // tee zones
-    if(!isBack){
-      if(p.indexOf('left chest')!==-1||p.indexOf('front left')!==-1) return {x:145,y:185,w:115,h:48};
-      if(p.indexOf('right chest')!==-1) return {x:340,y:185,w:115,h:48};
-      if(p.indexOf('center')!==-1||p.indexOf('full front')!==-1) return {x:175,y:190,w:250,h:160};
-      return {x:145,y:185,w:115,h:48};
-    } else {
-      if(p.indexOf('back center')!==-1||p==='back'||p.indexOf('full back')!==-1) return {x:175,y:185,w:250,h:160};
-      if(p.indexOf('nape')!==-1) return {x:215,y:140,w:170,h:40};
-      return {x:175,y:185,w:250,h:160};
-    }
-  }
-}
-
-function arrowSvg(bx) {
-  // bx = {x,y,w,h}
-  var cx = bx.x + bx.w/2;
-  var top = bx.y;
-  var left = bx.x;
-  var right = bx.x + bx.w;
-  // HPS line from top of garment (~y=80) to top of box
-  // Center arrow from left edge of garment (~x=115) to left of box
-  var hpsY1 = 80; // approx HPS (high point shoulder)
-  var edgeX = 110;
-  var s = 5; // arrowhead size
-  return [
-    // HPS dashed vertical line + arrowhead pointing down to box top
-    '<line x1="'+cx+'" y1="'+hpsY1+'" x2="'+cx+'" y2="'+top+'" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3"/>',
-    '<polygon points="'+cx+','+(top)+' '+(cx-s)+','+(top-s*1.5)+' '+(cx+s)+','+(top-s*1.5)+'" fill="#e53935"/>',
-    // Horizontal line from garment edge to box left + arrowhead
-    '<line x1="'+edgeX+'" y1="'+(bx.y+bx.h/2)+'" x2="'+left+'" y2="'+(bx.y+bx.h/2)+'" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3"/>',
-    '<polygon points="'+left+','+(bx.y+bx.h/2)+' '+(left+s*1.5)+','+(bx.y+bx.h/2-s)+' '+(left+s*1.5)+','+(bx.y+bx.h/2+s)+'" fill="#e53935"/>',
-    // Tick at HPS start (T-bar)
-    '<line x1="'+(cx-12)+'" y1="'+hpsY1+'" x2="'+(cx+12)+'" y2="'+hpsY1+'" stroke="#e53935" stroke-width="1.5"/>',
-    // Tick at edge start
-    '<line x1="'+edgeX+'" y1="'+(bx.y+bx.h/2-10)+'" x2="'+edgeX+'" y2="'+(bx.y+bx.h/2+10)+'" stroke="#e53935" stroke-width="1.5"/>',
-  ].join('\n');
-}
-
-function placementRect(bx) {
-  return '<rect x="'+bx.x+'" y="'+bx.y+'" width="'+bx.w+'" height="'+bx.h+'" fill="rgba(100,100,100,0.35)" rx="3"/>';
-}
-
-function getHoodiesvg(placement, isBack) {
-  var bx = placementBox(placement, isBack, false);
-  // Hoodie SVG — simplified but recognisable
-  // Front: hood opening, kangaroo pocket, sleeves, cuffs, waistband
-  // Back: hood, back body, no pocket
-  var body, extra='';
-  if(!isBack){
-    body = `
-    <!-- body -->
-    <path d="M175,90 C155,95 130,120 115,150 L100,220 L100,530 L500,530 L500,220 L485,150 C470,120 445,95 425,90 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
-    <!-- sleeves -->
-    <path d="M115,150 L60,170 L45,320 L100,320 L100,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <path d="M485,150 L540,170 L555,320 L500,320 L500,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <!-- cuffs -->
-    <rect x="45" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <rect x="500" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <!-- waistband -->
-    <rect x="100" y="530" width="400" height="22" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <!-- hood -->
-    <path d="M175,90 C175,20 425,20 425,90" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <path d="M195,90 C195,40 405,40 405,90" fill="#e8e8e8" stroke="#bbb" stroke-width="1"/>
-    <!-- drawstring -->
-    <line x1="270" y1="100" x2="260" y2="130" stroke="#aaa" stroke-width="1.5"/>
-    <line x1="330" y1="100" x2="340" y2="130" stroke="#aaa" stroke-width="1.5"/>
-    <!-- kangaroo pocket -->
-    <path d="M195,400 L195,480 Q300,500 405,480 L405,400 Z" fill="#ddd" stroke="#aaa" stroke-width="1.5"/>
-    <!-- center seam -->
-    <line x1="300" y1="90" x2="300" y2="400" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
-    `;
-  } else {
-    body = `
-    <!-- body back -->
-    <path d="M175,90 C155,95 130,120 115,150 L100,220 L100,530 L500,530 L500,220 L485,150 C470,120 445,95 425,90 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
-    <!-- sleeves -->
-    <path d="M115,150 L60,170 L45,320 L100,320 L100,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <path d="M485,150 L540,170 L555,320 L500,320 L500,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <!-- cuffs -->
-    <rect x="45" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <rect x="500" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <!-- waistband -->
-    <rect x="100" y="530" width="400" height="22" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
-    <!-- hood back -->
-    <path d="M175,90 C175,20 425,20 425,90" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
-    <path d="M210,90 C220,50 380,50 390,90" fill="#e4e4e4" stroke="#bbb" stroke-width="1"/>
-    `;
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 620" width="600" height="620">
-    <rect width="600" height="620" fill="white"/>
-    ${body}
-    ${placementRect(bx)}
-    ${arrowSvg(bx)}
-  </svg>`;
-}
-
-function getTeesvg(placement, isBack) {
-  var bx = placementBox(placement, isBack, true);
-  var body;
-  if(!isBack){
-    body = `
-    <path d="M175,80 L130,60 L60,130 L110,155 L110,510 L490,510 L490,155 L540,130 L470,60 L425,80 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
-    <!-- collar -->
-    <path d="M175,80 Q300,120 425,80" fill="none" stroke="#aaa" stroke-width="2"/>
-    <!-- sleeve seams -->
-    <line x1="110" y1="155" x2="60" y2="130" stroke="#bbb" stroke-width="1.5"/>
-    <line x1="490" y1="155" x2="540" y2="130" stroke="#bbb" stroke-width="1.5"/>
-    <!-- hem -->
-    <line x1="110" y1="510" x2="490" y2="510" stroke="#bbb" stroke-width="1.5"/>
-    `;
-  } else {
-    body = `
-    <path d="M175,80 L130,60 L60,130 L110,155 L110,510 L490,510 L490,155 L540,130 L470,60 L425,80 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
-    <path d="M175,80 Q300,115 425,80" fill="none" stroke="#aaa" stroke-width="2"/>
-    <line x1="110" y1="155" x2="60" y2="130" stroke="#bbb" stroke-width="1.5"/>
-    <line x1="490" y1="155" x2="540" y2="130" stroke="#bbb" stroke-width="1.5"/>
-    <line x1="110" y1="510" x2="490" y2="510" stroke="#bbb" stroke-width="1.5"/>
-    `;
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 580" width="600" height="580">
-    <rect width="600" height="580" fill="white"/>
-    ${body}
-    ${placementRect(bx)}
-    ${arrowSvg(bx)}
-  </svg>`;
-}
-// ─────────────────────────────────────────────────────────────────────────────
 
 function med(){return {style:'medium'};}
 function thn(){return {style:'thin'};}
@@ -593,11 +466,22 @@ async function dlExcel(side){
       if(35+i<=46) sc(ws,35+i,4,line,null,null,brd(null,null,med(),null));
     });
 
-    // ── Garment mockup (SVG→Canvas→PNG) ──────────────────────────────────────
-    var mockPng = await buildMockupPng(exData.garmentType||'Hoodie', sd.placement||'', side);
-    if(mockPng){
-      var mockId=wb.addImage({base64:mockPng,extension:'png'});
-      ws.addImage(mockId,{tl:{col:0,row:12},br:{col:3.9,row:31},editAs:'oneCell'});
+    // ── Mockup uploaded pelo utilizador ──────────────────────────────────────
+    var mockB64 = side==='front' ? mfB64 : mbB64;
+    var mockType = side==='front' ? mfType : mbType;
+    if(mockB64 && mockType && mockType.startsWith('image/')){
+      var mockExt = mockType.split('/')[1]||'png';
+      if(mockExt==='jpeg') mockExt='jpg';
+      // Calcular dimensões reais da imagem para preservar aspect ratio
+      var mockDims = await getImageDims(mockB64, mockType);
+      var mockId = wb.addImage({base64:mockB64, extension:mockExt});
+      // Área disponível: col 0-3, rows 12-31 (aprox 300px wide x 290px tall em EMU proporcionais)
+      // Usar nativeSize=false e deixar o ExcelJS calcular dentro da bounding box
+      ws.addImage(mockId, {
+        tl: {col:0, row:12},
+        ext: {width: mockDims.w, height: mockDims.h},
+        editAs: 'oneCell'
+      });
     }
 
     var buf=await wb.xlsx.writeBuffer();
