@@ -482,8 +482,8 @@ async function dlExcel(side){
       var mockExt = mockType.split('/')[1]||'png';
       if(mockExt==='jpeg') mockExt='jpg';
       var mockId = wb.addImage({base64:mockB64, extension:mockExt});
-      // fit-to-area preservando aspect ratio (área ~285x490px)
-      var mDims = await getImageDims(mockB64, mockType, 285, 490);
+      // Inserir com proporção correta — lado maior = 300px, ajustar tamanho no Excel se necessário
+      var mDims = await getImageDims(mockB64, mockType, 300, 300);
       ws.addImage(mockId, {tl:{col:0,row:12}, ext:{width:mDims.w, height:mDims.h}, editAs:'oneCell'});
     }
 
