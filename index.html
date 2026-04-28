@@ -243,6 +243,181 @@ function showExt(d){
   });
 }
 
+// ── Garment Mockup Builder ────────────────────────────────────────────────────
+// Returns base64 PNG (no prefix) of the garment SVG rendered via Canvas
+function buildMockupPng(garmentType, placement, side) {
+  return new Promise(function(resolve) {
+    var isBack = side === 'back';
+    var g = (garmentType||'').toLowerCase();
+    var isTee = g.indexOf('t-shirt')!==-1||g.indexOf('tshirt')!==-1||g==='tee'||g.indexOf('t shirt')!==-1;
+    var svg = isTee ? getTeesvg(placement, isBack) : getHoodiesvg(placement, isBack);
+    var blob = new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+    var url  = URL.createObjectURL(blob);
+    var img  = new Image();
+    img.onload = function(){
+      var canvas = document.createElement('canvas');
+      canvas.width = 600; canvas.height = 700;
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,600,700);
+      ctx.drawImage(img,0,0,600,700);
+      URL.revokeObjectURL(url);
+      // return base64 without data: prefix
+      var dataUrl = canvas.toDataURL('image/png');
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+// Placement → {x,y,w,h} in SVG coordinate space (600×700 viewBox)
+function placementBox(placement, isBack, isTee) {
+  var p = (placement||'').toLowerCase();
+  // hoodie zones (approx)
+  if(!isTee){
+    if(!isBack){
+      if(p.indexOf('left chest')!==-1||p.indexOf('front left')!==-1) return {x:155,y:195,w:115,h:48};
+      if(p.indexOf('right chest')!==-1||p.indexOf('front right')!==-1) return {x:330,y:195,w:115,h:48};
+      if(p.indexOf('center chest')!==-1||p.indexOf('front center')!==-1||p.indexOf('chest center')!==-1) return {x:200,y:205,w:200,h:55};
+      if(p.indexOf('full front')!==-1) return {x:170,y:195,w:260,h:170};
+      return {x:155,y:195,w:115,h:48}; // default front left chest
+    } else {
+      if(p.indexOf('back center')!==-1||p.indexOf('center back')!==-1||p==='back'||p.indexOf('full back')!==-1) return {x:170,y:195,w:260,h:170};
+      if(p.indexOf('back left')!==-1) return {x:155,y:195,w:115,h:48};
+      if(p.indexOf('back right')!==-1) return {x:330,y:195,w:115,h:48};
+      if(p.indexOf('nape')!==-1||p.indexOf('collar')!==-1) return {x:210,y:145,w:180,h:42};
+      return {x:170,y:195,w:260,h:170};
+    }
+  } else {
+    // tee zones
+    if(!isBack){
+      if(p.indexOf('left chest')!==-1||p.indexOf('front left')!==-1) return {x:145,y:185,w:115,h:48};
+      if(p.indexOf('right chest')!==-1) return {x:340,y:185,w:115,h:48};
+      if(p.indexOf('center')!==-1||p.indexOf('full front')!==-1) return {x:175,y:190,w:250,h:160};
+      return {x:145,y:185,w:115,h:48};
+    } else {
+      if(p.indexOf('back center')!==-1||p==='back'||p.indexOf('full back')!==-1) return {x:175,y:185,w:250,h:160};
+      if(p.indexOf('nape')!==-1) return {x:215,y:140,w:170,h:40};
+      return {x:175,y:185,w:250,h:160};
+    }
+  }
+}
+
+function arrowSvg(bx) {
+  // bx = {x,y,w,h}
+  var cx = bx.x + bx.w/2;
+  var top = bx.y;
+  var left = bx.x;
+  var right = bx.x + bx.w;
+  // HPS line from top of garment (~y=80) to top of box
+  // Center arrow from left edge of garment (~x=115) to left of box
+  var hpsY1 = 80; // approx HPS (high point shoulder)
+  var edgeX = 110;
+  var s = 5; // arrowhead size
+  return [
+    // HPS dashed vertical line + arrowhead pointing down to box top
+    '<line x1="'+cx+'" y1="'+hpsY1+'" x2="'+cx+'" y2="'+top+'" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3"/>',
+    '<polygon points="'+cx+','+(top)+' '+(cx-s)+','+(top-s*1.5)+' '+(cx+s)+','+(top-s*1.5)+'" fill="#e53935"/>',
+    // Horizontal line from garment edge to box left + arrowhead
+    '<line x1="'+edgeX+'" y1="'+(bx.y+bx.h/2)+'" x2="'+left+'" y2="'+(bx.y+bx.h/2)+'" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3"/>',
+    '<polygon points="'+left+','+(bx.y+bx.h/2)+' '+(left+s*1.5)+','+(bx.y+bx.h/2-s)+' '+(left+s*1.5)+','+(bx.y+bx.h/2+s)+'" fill="#e53935"/>',
+    // Tick at HPS start (T-bar)
+    '<line x1="'+(cx-12)+'" y1="'+hpsY1+'" x2="'+(cx+12)+'" y2="'+hpsY1+'" stroke="#e53935" stroke-width="1.5"/>',
+    // Tick at edge start
+    '<line x1="'+edgeX+'" y1="'+(bx.y+bx.h/2-10)+'" x2="'+edgeX+'" y2="'+(bx.y+bx.h/2+10)+'" stroke="#e53935" stroke-width="1.5"/>',
+  ].join('\n');
+}
+
+function placementRect(bx) {
+  return '<rect x="'+bx.x+'" y="'+bx.y+'" width="'+bx.w+'" height="'+bx.h+'" fill="rgba(100,100,100,0.35)" rx="3"/>';
+}
+
+function getHoodiesvg(placement, isBack) {
+  var bx = placementBox(placement, isBack, false);
+  // Hoodie SVG — simplified but recognisable
+  // Front: hood opening, kangaroo pocket, sleeves, cuffs, waistband
+  // Back: hood, back body, no pocket
+  var body, extra='';
+  if(!isBack){
+    body = `
+    <!-- body -->
+    <path d="M175,90 C155,95 130,120 115,150 L100,220 L100,530 L500,530 L500,220 L485,150 C470,120 445,95 425,90 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M115,150 L60,170 L45,320 L100,320 L100,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <path d="M485,150 L540,170 L555,320 L500,320 L500,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <!-- cuffs -->
+    <rect x="45" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <rect x="500" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <!-- waistband -->
+    <rect x="100" y="530" width="400" height="22" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <!-- hood -->
+    <path d="M175,90 C175,20 425,20 425,90" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <path d="M195,90 C195,40 405,40 405,90" fill="#e8e8e8" stroke="#bbb" stroke-width="1"/>
+    <!-- drawstring -->
+    <line x1="270" y1="100" x2="260" y2="130" stroke="#aaa" stroke-width="1.5"/>
+    <line x1="330" y1="100" x2="340" y2="130" stroke="#aaa" stroke-width="1.5"/>
+    <!-- kangaroo pocket -->
+    <path d="M195,400 L195,480 Q300,500 405,480 L405,400 Z" fill="#ddd" stroke="#aaa" stroke-width="1.5"/>
+    <!-- center seam -->
+    <line x1="300" y1="90" x2="300" y2="400" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+    `;
+  } else {
+    body = `
+    <!-- body back -->
+    <path d="M175,90 C155,95 130,120 115,150 L100,220 L100,530 L500,530 L500,220 L485,150 C470,120 445,95 425,90 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
+    <!-- sleeves -->
+    <path d="M115,150 L60,170 L45,320 L100,320 L100,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <path d="M485,150 L540,170 L555,320 L500,320 L500,220 Z" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <!-- cuffs -->
+    <rect x="45" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <rect x="500" y="320" width="55" height="20" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <!-- waistband -->
+    <rect x="100" y="530" width="400" height="22" rx="4" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+    <!-- hood back -->
+    <path d="M175,90 C175,20 425,20 425,90" fill="#e0e0e0" stroke="#aaa" stroke-width="2"/>
+    <path d="M210,90 C220,50 380,50 390,90" fill="#e4e4e4" stroke="#bbb" stroke-width="1"/>
+    `;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 620" width="600" height="620">
+    <rect width="600" height="620" fill="white"/>
+    ${body}
+    ${placementRect(bx)}
+    ${arrowSvg(bx)}
+  </svg>`;
+}
+
+function getTeesvg(placement, isBack) {
+  var bx = placementBox(placement, isBack, true);
+  var body;
+  if(!isBack){
+    body = `
+    <path d="M175,80 L130,60 L60,130 L110,155 L110,510 L490,510 L490,155 L540,130 L470,60 L425,80 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
+    <!-- collar -->
+    <path d="M175,80 Q300,120 425,80" fill="none" stroke="#aaa" stroke-width="2"/>
+    <!-- sleeve seams -->
+    <line x1="110" y1="155" x2="60" y2="130" stroke="#bbb" stroke-width="1.5"/>
+    <line x1="490" y1="155" x2="540" y2="130" stroke="#bbb" stroke-width="1.5"/>
+    <!-- hem -->
+    <line x1="110" y1="510" x2="490" y2="510" stroke="#bbb" stroke-width="1.5"/>
+    `;
+  } else {
+    body = `
+    <path d="M175,80 L130,60 L60,130 L110,155 L110,510 L490,510 L490,155 L540,130 L470,60 L425,80 Z" fill="#e8e8e8" stroke="#aaa" stroke-width="2"/>
+    <path d="M175,80 Q300,115 425,80" fill="none" stroke="#aaa" stroke-width="2"/>
+    <line x1="110" y1="155" x2="60" y2="130" stroke="#bbb" stroke-width="1.5"/>
+    <line x1="490" y1="155" x2="540" y2="130" stroke="#bbb" stroke-width="1.5"/>
+    <line x1="110" y1="510" x2="490" y2="510" stroke="#bbb" stroke-width="1.5"/>
+    `;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 580" width="600" height="580">
+    <rect width="600" height="580" fill="white"/>
+    ${body}
+    ${placementRect(bx)}
+    ${arrowSvg(bx)}
+  </svg>`;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function med(){return {style:'medium'};}
 function thn(){return {style:'thin'};}
 function brd(t,b,l,r){
@@ -386,22 +561,20 @@ async function dlExcel(side){
     sc(ws,34,1,'COR FUNDO',{bold:true},null,brd(med(),thn(),med(),null));
     sc(ws,34,2,'COR EST./BOR.',{bold:true},{horizontal:'center'},brd(med(),thn(),thn(),med()));
     ws.getCell(34,3).border=brd(med(),thn(),null,med());
-    sc(ws,34,4,'POSIÇÃO DO BORDADO :',{bold:true},{horizontal:'center'},brd(med(),med(),med(),med()));
+    var techLabel=(sd.technique||'DECORAÇÃO').toUpperCase();
+    sc(ws,34,4,techLabel,{bold:true},{horizontal:'center'},brd(med(),med(),med(),med()));
     for(var c=5;c<=8;c++) ws.getCell(34,c).border=brd(med(),med(),null,c===8?med():null);
 
-    // Rows 35-47
+    // Rows 35-47 — HPS, Center, Width, Notes only
     var pantones=(sd.pantones||[]).join(' / ');
     var hps=(sd.hps||'').toString().replace(/cm/gi,'').trim();
     var ctr=(sd.center||'').toString().replace(/cm/gi,'').trim();
+    var ww=(sd.width||'').toString().replace(/cm/gi,'').trim();
     var posLines=[
-      sd.placement?'Placement: '+sd.placement:'',
-      sd.zone?'Zone: '+sd.zone:'',
       hps?'HPS: '+hps+' cm':'',
       ctr?'Center: '+ctr+' cm':'',
-      sd.technique?'Technique: '+sd.technique:'',
+      ww?'Width: '+ww+' cm':'',
       (sd.notes&&sd.notes!=='-'&&sd.notes!=='—')?'Notes: '+sd.notes:'',
-      exData.brandName?'Brand: '+exData.brandName:'',
-      (exData.neckLabelType&&exData.neckLabelType!=='None')?'Neck Label: '+exData.neckLabelType:'',
     ].filter(Boolean);
 
     for(var r=35;r<=47;r++){
@@ -419,6 +592,13 @@ async function dlExcel(side){
     posLines.forEach(function(line,i){
       if(35+i<=46) sc(ws,35+i,4,line,null,null,brd(null,null,med(),null));
     });
+
+    // ── Garment mockup (SVG→Canvas→PNG) ──────────────────────────────────────
+    var mockPng = await buildMockupPng(exData.garmentType||'Hoodie', sd.placement||'', side);
+    if(mockPng){
+      var mockId=wb.addImage({base64:mockPng,extension:'png'});
+      ws.addImage(mockId,{tl:{col:0,row:12},br:{col:3.9,row:31},editAs:'oneCell'});
+    }
 
     var buf=await wb.xlsx.writeBuffer();
     var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
