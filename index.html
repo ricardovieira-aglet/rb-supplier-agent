@@ -277,16 +277,16 @@ function showExt(d){
 }
 
 
-// Retorna dimensões da imagem em píxeis, fitada dentro de 300x310 preservando aspect ratio
-function getImageDims(b64, mtype) {
+// Retorna dimensões em píxeis fitadas dentro de maxW x maxH preservando aspect ratio
+function getImageDims(b64, mtype, maxW, maxH) {
+  maxW = maxW || 300; maxH = maxH || 310;
   return new Promise(function(resolve){
     var img = new Image();
     img.onload = function(){
-      var maxW = 300, maxH = 310;
       var ratio = Math.min(maxW/img.naturalWidth, maxH/img.naturalHeight);
       resolve({w: Math.round(img.naturalWidth*ratio), h: Math.round(img.naturalHeight*ratio)});
     };
-    img.onerror = function(){ resolve({w:280, h:300}); };
+    img.onerror = function(){ resolve({w:maxW, h:maxH}); };
     img.src = 'data:'+mtype+';base64,'+b64;
   });
 }
@@ -482,7 +482,9 @@ async function dlExcel(side){
       var mockExt = mockType.split('/')[1]||'png';
       if(mockExt==='jpeg') mockExt='jpg';
       var mockId = wb.addImage({base64:mockB64, extension:mockExt});
-      ws.addImage(mockId, {tl:{col:0,row:12}, br:{col:3.9,row:31}, editAs:'oneCell'});
+      // fit-to-area preservando aspect ratio (área ~285x490px)
+      var mDims = await getImageDims(mockB64, mockType, 285, 490);
+      ws.addImage(mockId, {tl:{col:0,row:12}, ext:{width:mDims.w, height:mDims.h}, editAs:'oneCell'});
     }
 
     var buf=await wb.xlsx.writeBuffer();
