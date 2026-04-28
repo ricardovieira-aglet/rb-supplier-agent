@@ -404,30 +404,39 @@ async function dlExcel(side){
     sc(ws,12,7,wVal,null,null,brd(med(),med(),med(),med()));
     ws.getCell(12,8).border=brd(med(),med(),null,med());
 
-    // Row 13 top artwork box
-    for(var c=1;c<=4;c++) ws.getCell(13,c).border=brd(med(),null,c===1?med():null,null);
+    // ── Borders: lado esquerdo (mockup) col A-D rows 12-31 ──────────────────
+    // Top border row 12 já feito acima (medidas)
+    for(var r=13;r<=30;r++){
+      ws.getCell(r,1).border=brd(null,null,med(),null);  // borda esquerda
+      ws.getCell(r,4).border=brd(null,null,null,med());  // borda direita col D
+    }
+    ws.getCell(31,1).border=brd(med(),null,med(),null);
+    ws.getCell(31,2).border=brd(med(),null,null,null);
+    ws.getCell(31,3).border=brd(med(),null,null,null);
+    ws.getCell(31,4).border=brd(med(),null,null,med());
+
+    // ── Borders: lado direito (artwork cliente) col E-H rows 13-30 ───────────
     ws.mergeCells('E13:H13');
     ws.getCell(13,5).border=brd(med(),med(),med(),med());
     for(var c=6;c<=8;c++) ws.getCell(13,c).border=brd(med(),med(),null,c===8?med():null);
-
-    // Rows 14-30 artwork borders
     for(var r=14;r<=30;r++){
-      ws.getCell(r,1).border=brd(null,null,med(),null);
+      ws.getCell(r,5).border=brd(null,null,med(),null);
       ws.getCell(r,8).border=brd(null,null,null,med());
     }
+    ws.getCell(31,5).border=brd(med(),null,med(),null);
+    ws.getCell(31,6).border=brd(med(),null,null,null);
+    ws.getCell(31,7).border=brd(med(),null,null,null);
+    ws.getCell(31,8).border=brd(med(),null,null,med());
+    ws.getCell(32,5).border=brd(null,null,med(),null); ws.getCell(32,8).border=brd(null,null,null,med());
+    ws.getCell(33,5).border=brd(null,null,med(),null); ws.getCell(33,8).border=brd(null,null,null,med());
 
-    // Artwork image
+    // ── Artwork cliente → lado direito col E-H ────────────────────────────────
     if(artB64&&artType&&artType.startsWith('image/')){
       var ext=artType.split('/')[1]||'png';
       if(ext==='jpeg')ext='jpg';
       var artId=wb.addImage({base64:artB64,extension:ext});
-      ws.addImage(artId,{tl:{col:0,row:13},br:{col:7.9,row:30},editAs:'oneCell'});
+      ws.addImage(artId,{tl:{col:4,row:13},br:{col:7.9,row:30},editAs:'oneCell'});
     }
-
-    // Rows 31-33 bottom artwork
-    for(var c=1;c<=8;c++) ws.getCell(31,c).border=brd(med(),null,c===1?med():null,c===8?med():null);
-    ws.getCell(32,1).border=brd(null,null,med(),null); ws.getCell(32,8).border=brd(null,null,null,med());
-    ws.getCell(33,1).border=brd(null,null,med(),null); ws.getCell(33,8).border=brd(null,null,null,med());
 
     // Row 34
     ws.mergeCells('B34:C34'); ws.mergeCells('D34:H34');
@@ -466,22 +475,14 @@ async function dlExcel(side){
       if(35+i<=46) sc(ws,35+i,4,line,null,null,brd(null,null,med(),null));
     });
 
-    // ── Mockup uploaded pelo utilizador ──────────────────────────────────────
+    // ── Mockup → lado esquerdo col A-D, rows 12-31 ──────────────────────────
     var mockB64 = side==='front' ? mfB64 : mbB64;
     var mockType = side==='front' ? mfType : mbType;
     if(mockB64 && mockType && mockType.startsWith('image/')){
       var mockExt = mockType.split('/')[1]||'png';
       if(mockExt==='jpeg') mockExt='jpg';
-      // Calcular dimensões reais da imagem para preservar aspect ratio
-      var mockDims = await getImageDims(mockB64, mockType);
       var mockId = wb.addImage({base64:mockB64, extension:mockExt});
-      // Área disponível: col 0-3, rows 12-31 (aprox 300px wide x 290px tall em EMU proporcionais)
-      // Usar nativeSize=false e deixar o ExcelJS calcular dentro da bounding box
-      ws.addImage(mockId, {
-        tl: {col:0, row:12},
-        ext: {width: mockDims.w, height: mockDims.h},
-        editAs: 'oneCell'
-      });
+      ws.addImage(mockId, {tl:{col:0,row:12}, br:{col:3.9,row:31}, editAs:'oneCell'});
     }
 
     var buf=await wb.xlsx.writeBuffer();
