@@ -199,7 +199,7 @@ async function runAgent(){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:content}]})
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:content}]})
     });
     var d=await resp.json();
     if(d.error) throw new Error(d.error.message);
